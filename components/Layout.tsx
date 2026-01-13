@@ -30,6 +30,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
 
   const userPhoto = `https://picsum.photos/seed/${user.id}/100/100`;
 
+  const navigateToExplore = (type: string, id: string) => {
+    navigate(`/explore/${type}/${encodeURIComponent(id)}`);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Sidebar */}
@@ -57,7 +61,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
                   const isSpecial = item === 'Conheça outros assuntos';
                   return (
                     <li key={idx}>
-                      <button className={`text-sm transition-colors w-full text-left py-1 truncate ${isSpecial ? 'text-red-600 hover:text-red-500 font-bold' : 'text-zinc-400 hover:text-white'}`}>
+                      <button 
+                        onClick={() => !isSpecial && navigateToExplore('subject', item)}
+                        className={`text-sm transition-colors w-full text-left py-1 truncate ${isSpecial ? 'text-red-600 hover:text-red-500 font-bold cursor-default' : 'text-zinc-400 hover:text-white'}`}
+                      >
                         {item}
                       </button>
                     </li>
@@ -72,7 +79,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
               <ul className="space-y-2">
                 {EXPERTS.map((expert) => (
                   <li key={expert.id}>
-                    <button className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate">
+                    <button 
+                      onClick={() => navigateToExplore('expert', expert.id)}
+                      className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate"
+                    >
                       {expert.name}
                     </button>
                   </li>
@@ -87,7 +97,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
               <ul className="space-y-2">
                 {TRILHAS.map((trilha) => (
                   <li key={trilha.id}>
-                    <button className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate">
+                    <button 
+                      onClick={() => navigateToExplore('trilha', trilha.id)}
+                      className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate"
+                    >
                       {trilha.name}
                     </button>
                   </li>

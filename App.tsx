@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import Home from './pages/Home';
 import VideoDetails from './pages/VideoDetails';
+import Explore from './pages/Explore';
 import Admin from './pages/Admin';
 import { User } from './types';
 
@@ -30,6 +31,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={user ? <Navigate to="/home" /> : <Auth onLogin={login} />} />
         <Route path="/home" element={user ? <Home user={user} onLogout={logout} /> : <Navigate to="/auth" />} />
+        <Route path="/explore/:type/:id" element={user ? <Explore user={user} onLogout={logout} /> : <Navigate to="/auth" />} />
         <Route path="/video/:id" element={user ? <VideoDetails user={user} onLogout={logout} /> : <Navigate to="/auth" />} />
         <Route path="/admin" element={user?.role === 'admin' ? <Admin user={user} onLogout={logout} /> : <Navigate to="/home" />} />
       </Routes>
