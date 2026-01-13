@@ -55,7 +55,7 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
       id: `v-custom-${Date.now()}`,
       title: newVideo.title,
       description: newVideo.description,
-      thumbnail: `https://picsum.photos/1920/1080?seed=${Date.now()}`,
+      thumbnail: `https://picsum.photos/1200/630?seed=${Date.now()}`,
       embedUrl: embedUrl,
       expertId: newVideo.expertId,
       category: newVideo.category,

@@ -41,16 +41,16 @@ export const EXPERTS: Expert[] = [
 ];
 
 export const TRILHAS: Trilha[] = [
-  { id: 't-1', name: 'Ganhar dinheiro', description: 'Aprenda as bases da riqueza', thumbnail: 'https://picsum.photos/seed/trilha1/1920/1080' },
-  { id: 't-2', name: 'Abrir empresa', description: 'Do zero ao primeiro faturamento', thumbnail: 'https://picsum.photos/seed/trilha2/1920/1080' },
-  { id: 't-3', name: 'Morar no exterior', description: 'Conquiste sua vaga global', thumbnail: 'https://picsum.photos/seed/trilha3/1920/1080' },
-  { id: 't-4', name: 'Falar Inglês', description: 'Fluência acelerada', thumbnail: 'https://picsum.photos/seed/trilha4/1920/1080' }
+  { id: 't-1', name: 'Ganhar dinheiro', description: 'Aprenda as bases da riqueza', thumbnail: 'https://picsum.photos/seed/trilha1/1200/630' },
+  { id: 't-2', name: 'Abrir empresa', description: 'Do zero ao primeiro faturamento', thumbnail: 'https://picsum.photos/seed/trilha2/1200/630' },
+  { id: 't-3', name: 'Morar no exterior', description: 'Conquiste sua vaga global', thumbnail: 'https://picsum.photos/seed/trilha3/1200/630' },
+  { id: 't-4', name: 'Falar Inglês', description: 'Fluência acelerada', thumbnail: 'https://picsum.photos/seed/trilha4/1200/630' }
 ];
 
 // Refined URL to avoid Error 153 by using a clean version of the embed link
 export const DEFAULT_YOUTUBE_URL = 'https://www.youtube.com/embed/31GZfsFrBRM';
 
-const PICSUM_BASE = 'https://picsum.photos/1920/1080';
+const PICSUM_BASE = 'https://picsum.photos/1200/630';
 
 export const VIDEOS: Video[] = [
   {
