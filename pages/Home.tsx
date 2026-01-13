@@ -14,9 +14,17 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeHero, setActiveHero] = useState(0);
-  const featuredVideos = VIDEOS.slice(0, 3);
+  const [allVideos, setAllVideos] = useState<Video[]>([]);
 
   useEffect(() => {
+    const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
+    setAllVideos([...VIDEOS, ...customVideos]);
+  }, []);
+
+  const featuredVideos = allVideos.slice(0, 3);
+
+  useEffect(() => {
+    if (featuredVideos.length === 0) return;
     const timer = setInterval(() => {
       setActiveHero((prev) => (prev + 1) % featuredVideos.length);
     }, 8000);
@@ -40,60 +48,62 @@ const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
   return (
     <Layout user={user} onLogout={onLogout}>
       {/* Hero Carousel */}
-      <section className="relative h-[70vh] w-full overflow-hidden">
-        {featuredVideos.map((video, idx) => (
-          <div 
-            key={video.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ${idx === activeHero ? 'opacity-100' : 'opacity-0'}`}
-          >
-            <img 
-              src={video.thumbnail} 
-              alt={video.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-            
-            <div className="absolute bottom-[20%] left-8 md:left-16 max-w-2xl">
-              <span className="bg-red-600 text-[10px] font-bold px-2 py-0.5 rounded mb-4 inline-block uppercase tracking-widest">Destaque</span>
-              <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight">{video.title}</h2>
-              <p className="text-lg text-zinc-300 mb-8 line-clamp-3">{video.description}</p>
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => recordView(video.id)}
-                  className="flex items-center gap-2 bg-white text-black px-8 py-3 rounded font-bold hover:bg-zinc-200 transition-colors"
-                >
-                  <Play fill="black" size={24} /> Assistir
-                </button>
-                <button 
-                  onClick={() => recordView(video.id)}
-                  className="flex items-center gap-2 bg-zinc-600/50 backdrop-blur text-white px-8 py-3 rounded font-bold hover:bg-zinc-600 transition-colors"
-                >
-                  <Info size={24} /> Mais Info
-                </button>
+      {featuredVideos.length > 0 && (
+        <section className="relative h-[70vh] w-full overflow-hidden">
+          {featuredVideos.map((video, idx) => (
+            <div 
+              key={video.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ${idx === activeHero ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <img 
+                src={video.thumbnail} 
+                alt={video.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+              
+              <div className="absolute bottom-[20%] left-8 md:left-16 max-w-2xl">
+                <span className="bg-red-600 text-[10px] font-bold px-2 py-0.5 rounded mb-4 inline-block uppercase tracking-widest">Destaque</span>
+                <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight">{video.title}</h2>
+                <p className="text-lg text-zinc-300 mb-8 line-clamp-3">{video.description}</p>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => recordView(video.id)}
+                    className="flex items-center gap-2 bg-white text-black px-8 py-3 rounded font-bold hover:bg-zinc-200 transition-colors"
+                  >
+                    <Play fill="black" size={24} /> Assistir
+                  </button>
+                  <button 
+                    onClick={() => recordView(video.id)}
+                    className="flex items-center gap-2 bg-zinc-600/50 backdrop-blur text-white px-8 py-3 rounded font-bold hover:bg-zinc-600 transition-colors"
+                  >
+                    <Info size={24} /> Mais Info
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-10 right-8 flex gap-2">
-          {featuredVideos.map((_, idx) => (
-            <button 
-              key={idx}
-              onClick={() => setActiveHero(idx)}
-              className={`h-1 transition-all duration-300 ${idx === activeHero ? 'w-8 bg-red-600' : 'w-4 bg-zinc-600'}`}
-            />
           ))}
-        </div>
-      </section>
+          
+          {/* Carousel Indicators */}
+          <div className="absolute bottom-10 right-8 flex gap-2">
+            {featuredVideos.map((_, idx) => (
+              <button 
+                key={idx}
+                onClick={() => setActiveHero(idx)}
+                className={`h-1 transition-all duration-300 ${idx === activeHero ? 'w-8 bg-red-600' : 'w-4 bg-zinc-600'}`}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Video Rows */}
-      <div className="px-8 mt-[-80px] relative z-20 space-y-12">
+      <div className={`px-8 ${featuredVideos.length > 0 ? 'mt-[-80px]' : 'mt-8'} relative z-20 space-y-12`}>
         
-        <VideoRow title="Em alta" videos={VIDEOS.sort((a,b) => b.views - a.views)} onVideoClick={recordView} />
+        <VideoRow title="Em alta" videos={[...allVideos].sort((a,b) => b.views - a.views)} onVideoClick={recordView} />
         
-        <VideoRow title="Para você: Empreendedorismo" videos={VIDEOS.filter(v => v.category === 'Empreendedorismo')} onVideoClick={recordView} />
+        <VideoRow title="Para você: Empreendedorismo" videos={allVideos.filter(v => v.category === 'Empreendedorismo')} onVideoClick={recordView} />
         
         {/* Trilhas Section */}
         <section>
@@ -117,7 +127,7 @@ const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
           </div>
         </section>
 
-        <VideoRow title="Educação e Idiomas" videos={VIDEOS.filter(v => ['Inglês', 'Educação'].includes(v.category))} onVideoClick={recordView} />
+        <VideoRow title="Educação e Idiomas" videos={allVideos.filter(v => ['Inglês', 'Educação'].includes(v.category))} onVideoClick={recordView} />
       </div>
     </Layout>
   );
@@ -130,6 +140,8 @@ interface VideoRowProps {
 }
 
 const VideoRow: React.FC<VideoRowProps> = ({ title, videos, onVideoClick }) => {
+  if (videos.length === 0) return null;
+
   return (
     <section>
       <h3 className="text-2xl font-bold mb-4 flex items-center justify-between">

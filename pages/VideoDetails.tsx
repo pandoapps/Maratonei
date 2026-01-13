@@ -18,7 +18,9 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
   const [expert, setExpert] = useState<any>(null);
 
   useEffect(() => {
-    const v = VIDEOS.find((item) => item.id === id);
+    const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
+    const allAvailableVideos = [...VIDEOS, ...customVideos];
+    const v = allAvailableVideos.find((item) => item.id === id);
     if (v) {
       setVideo(v);
       setExpert(EXPERTS.find(e => e.id === v.expertId));
@@ -28,7 +30,12 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
 
   if (!video) return null;
 
-  const recommendations = VIDEOS.filter(v => v.id !== video.id).slice(0, 4);
+  const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
+  const allAvailableVideos = [...VIDEOS, ...customVideos];
+  const recommendations = allAvailableVideos.filter(v => v.id !== video.id).slice(0, 4);
+
+  // Using a clean URL with essential parameters to fix Error 153
+  const iframeSrc = `${video.embedUrl.split('?')[0]}?origin=${window.location.origin}&enablejsapi=1&rel=0&modestbranding=1`;
 
   return (
     <Layout user={user} onLogout={onLogout}>
@@ -47,11 +54,12 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
         <div className="w-full max-w-7xl mx-auto aspect-video px-4 md:px-8">
           <div className="relative w-full h-full bg-black rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
             <iframe 
-              src={`${video.embedUrl}?autoplay=1&mute=0`}
+              src={iframeSrc}
               title={video.title}
               className="w-full h-full"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             ></iframe>
           </div>
@@ -95,7 +103,7 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
                 <div>
                     <h3 className="text-red-500 font-bold mb-2">Insight Maratonei AI</h3>
                     <p className="text-zinc-300 text-sm">
-                        Este conteúdo de <strong>{expert?.name}</strong> é fundamental para a sua trilha de {video.category}. 
+                        Este conteúdo de <strong>{expert?.name || 'Expert Maratonei'}</strong> é fundamental para a sua trilha de {video.category}. 
                         Ele aborda pontos cruciais que frequentemente impedem o crescimento no nível iniciante. 
                         Preste atenção especial aos minutos finais onde ele compartilha o "pulo do gato".
                     </p>
@@ -106,13 +114,13 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
           <div className="space-y-8">
             <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
                 <div className="flex items-center gap-4 mb-4">
-                    <img src={expert?.image} className="w-16 h-16 rounded-full object-cover border-2 border-red-600" alt={expert?.name} />
+                    <img src={expert?.image || 'https://picsum.photos/seed/default/400/400'} className="w-16 h-16 rounded-full object-cover border-2 border-red-600" alt={expert?.name} />
                     <div>
-                        <h4 className="font-bold text-lg">{expert?.name}</h4>
-                        <span className="text-zinc-500 text-sm">{expert?.role}</span>
+                        <h4 className="font-bold text-lg">{expert?.name || 'Expert Especialista'}</h4>
+                        <span className="text-zinc-500 text-sm">{expert?.role || 'Mentor Maratonei'}</span>
                     </div>
                 </div>
-                <p className="text-zinc-400 text-sm italic mb-4">"{expert?.bio}"</p>
+                <p className="text-zinc-400 text-sm italic mb-4">"{expert?.bio || 'Líder em sua área com anos de experiência transformando vidas através do conhecimento.'}"</p>
                 <button className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 rounded transition-colors text-sm">
                     Ver Perfil do Expert
                 </button>
