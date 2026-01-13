@@ -15,9 +15,12 @@ class SharePortalData
     public function handle(Request $request, Closure $next): Response
     {
         Inertia::share('sidebar', [
-            'categories' => Category::inRandomOrder()->take(5)->get(['id', 'name', 'slug']),
-            'experts' => Expert::inRandomOrder()->take(5)->get(['id', 'name']),
-            'trails' => Trail::inRandomOrder()->take(5)->get(['id', 'name']),
+            'categories' => Category::orderBy('name')->take(5)->get(['id', 'name', 'slug']),
+            'experts' => Expert::orderBy('name')->take(5)->get(['id', 'name']),
+            'trails' => Trail::orderBy('name')->take(5)->get(['id', 'name']),
+            'totalCategories' => Category::count(),
+            'totalExperts' => Expert::count(),
+            'totalTrails' => Trail::count(),
         ]);
 
         return $next($request);

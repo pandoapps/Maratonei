@@ -28,6 +28,9 @@ interface SidebarData {
     categories: Category[];
     experts: Expert[];
     trails: Trail[];
+    totalCategories: number;
+    totalExperts: number;
+    totalTrails: number;
 }
 
 export default function PortalLayout({ children }: PropsWithChildren) {
@@ -87,6 +90,16 @@ export default function PortalLayout({ children }: PropsWithChildren) {
                                     </Link>
                                 </li>
                             ))}
+                            {sidebar?.totalCategories > 5 && (
+                                <li>
+                                    <Link
+                                        href={route('portal.categories')}
+                                        className="flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm text-yellow-400 hover:bg-zinc-900 hover:text-yellow-300 font-medium"
+                                    >
+                                        Conheça outros assuntos
+                                    </Link>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
@@ -111,6 +124,16 @@ export default function PortalLayout({ children }: PropsWithChildren) {
                                     </Link>
                                 </li>
                             ))}
+                            {sidebar?.totalExperts > 5 && (
+                                <li>
+                                    <Link
+                                        href={route('portal.experts')}
+                                        className="flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm text-yellow-400 hover:bg-zinc-900 hover:text-yellow-300 font-medium"
+                                    >
+                                        Conheça outros experts
+                                    </Link>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
@@ -135,6 +158,16 @@ export default function PortalLayout({ children }: PropsWithChildren) {
                                     </Link>
                                 </li>
                             ))}
+                            {sidebar?.totalTrails > 5 && (
+                                <li>
+                                    <Link
+                                        href={route('portal.trails')}
+                                        className="flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm text-yellow-400 hover:bg-zinc-900 hover:text-yellow-300 font-medium"
+                                    >
+                                        Conheça outras trilhas
+                                    </Link>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
