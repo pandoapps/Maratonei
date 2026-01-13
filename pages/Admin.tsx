@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { User, Video, Expert, Trilha } from '../types';
 import { VIDEOS, EXPERTS, TRILHAS, ASSUNTOS } from '../constants';
-import { Users, Video as VideoIcon, UserCheck, Layers, Plus, Trash2, Eye, ChevronRight, X, Link as LinkIcon } from 'lucide-react';
+import { Users, Video as VideoIcon, UserCheck, Layers, Plus, Trash2, Eye, ChevronRight, X, Link as LinkIcon, PieChart as PieIcon } from 'lucide-react';
 
 interface AdminProps {
   user: User;
@@ -25,7 +25,7 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
     expertId: '',
     category: '',
     trilhaId: '',
-    url: '' // Added URL field
+    url: ''
   });
 
   useEffect(() => {
@@ -42,8 +42,6 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
 
   const handleAddVideo = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Convert regular YouTube link to embed if necessary
     let embedUrl = newVideo.url;
     if (embedUrl.includes('watch?v=')) {
       embedUrl = embedUrl.replace('watch?v=', 'embed/');
@@ -69,12 +67,38 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
     setIsModalOpen(false);
     setNewVideo({ title: '', description: '', expertId: '', category: '', trilhaId: '', url: '' });
     alert('Vídeo adicionado com sucesso!');
-    window.location.reload(); // Refresh to show new video in allVideos
+    window.location.reload();
   };
 
-  // Combine static and custom videos for display
   const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
   const allVideos = [...VIDEOS, ...customVideos];
+
+  // Logic for Pie Chart Mockup
+  const expertStats = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allVideos.forEach(v => {
+      counts[v.expertId] = (counts[v.expertId] || 0) + 1;
+    });
+
+    const total = allVideos.length;
+    const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+    
+    let cumulativePercent = 0;
+    return EXPERTS.map((expert, index) => {
+      const count = counts[expert.id] || 0;
+      const percent = total > 0 ? (count / total) * 100 : 0;
+      const start = cumulativePercent;
+      cumulativePercent += percent;
+      return {
+        ...expert,
+        count,
+        percent,
+        start,
+        end: cumulativePercent,
+        color: colors[index % colors.length]
+      };
+    });
+  }, [allVideos]);
 
   return (
     <Layout user={user} onLogout={onLogout}>
@@ -92,12 +116,70 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
           </button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <StatCard icon={<Users className="text-blue-500" />} label="Usuários" value={usersList.length.toString()} />
-            <StatCard icon={<VideoIcon className="text-red-500" />} label="Vídeos" value={allVideos.length.toString()} />
-            <StatCard icon={<UserCheck className="text-green-500" />} label="Experts" value={EXPERTS.length.toString()} />
-            <StatCard icon={<Layers className="text-purple-500" />} label="Trilhas" value={TRILHAS.length.toString()} />
+        {/* Dashboard Section with Pie Chart */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
+          {/* Stats Summary */}
+          <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <StatCard icon={<Users className="text-blue-500" />} label="Usuários Ativos" value={usersList.length.toString()} />
+            <StatCard icon={<VideoIcon className="text-red-500" />} label="Total de Vídeos" value={allVideos.length.toString()} />
+            <StatCard icon={<UserCheck className="text-green-500" />} label="Experts Parceiros" value={EXPERTS.length.toString()} />
+            <StatCard icon={<Layers className="text-purple-500" />} label="Trilhas Ativas" value={TRILHAS.length.toString()} />
+          </div>
+
+          {/* Expert Distribution Chart */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-xl relative overflow-hidden">
+            <div className="flex items-center gap-2 mb-6">
+              <PieIcon size={20} className="text-yellow-400" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-widest">Vídeos por Expert</h3>
+            </div>
+            
+            <div className="flex flex-col md:flex-row xl:flex-col items-center justify-center gap-8">
+              {/* Pie Chart SVG Mockup */}
+              <div className="relative w-48 h-48">
+                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                  {expertStats.map((stat, i) => {
+                    const radius = 40;
+                    const circumference = 2 * Math.PI * radius;
+                    const offset = circumference - (stat.percent / 100) * circumference;
+                    const rotation = (stat.start / 100) * 360;
+                    return (
+                      <circle
+                        key={i}
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="transparent"
+                        stroke={stat.color}
+                        strokeWidth="12"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}
+                        className="transition-all duration-1000 ease-out"
+                      />
+                    );
+                  })}
+                  <circle cx="50" cy="50" r="30" fill="#18181b" /> {/* Inner hole for donut style */}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-xs text-zinc-500 font-bold uppercase">Total</span>
+                  <span className="text-2xl font-black text-white">{allVideos.length}</span>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex-1 w-full space-y-2">
+                {expertStats.map((stat, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stat.color }}></div>
+                      <span className="text-zinc-300 font-medium">{stat.name}</span>
+                    </div>
+                    <span className="text-zinc-500 font-bold">{Math.round(stat.percent)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -168,19 +250,13 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
                             ))}
                         </tbody>
                     </table>
-                    {(activeTab === 'experts' || activeTab === 'tracks') && (
-                        <div className="p-12 text-center text-zinc-500">
-                             Modo demonstração: Gestão de Experts e Trilhas virá na próxima atualização.
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Sidebar Inspector */}
             <div className="space-y-6">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-xl">
                     <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                        <Eye size={20} className="text-red-500" /> Inspetor de Usuário
+                        <Eye size={20} className="text-red-500" /> Inspetor
                     </h3>
                     
                     {selectedUser ? (
@@ -193,47 +269,40 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
                                 />
                                 <h4 className="font-bold text-lg text-white">{selectedUser.name}</h4>
                                 <p className="text-zinc-500 text-sm">{selectedUser.email}</p>
-                                <p className="text-[10px] text-zinc-600 mt-1 uppercase font-bold">Desde {new Date(selectedUser.createdAt).toLocaleDateString()}</p>
                             </div>
-
                             <div>
-                                <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Histórico de Acessos</h5>
+                                <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Acessos Recentes</h5>
                                 {userHistory.length > 0 ? (
                                     <ul className="space-y-3">
                                         {userHistory.map(vidId => {
                                             const v = allVideos.find(item => item.id === vidId);
                                             return v ? (
-                                                <li key={vidId} className="flex items-center gap-3 bg-zinc-950 p-2 rounded border border-zinc-800 group hover:border-red-600/50 transition-colors">
+                                                <li key={vidId} className="flex items-center gap-3 bg-zinc-950 p-2 rounded border border-zinc-800">
                                                     <img src={v.thumbnail} className="w-14 aspect-video rounded object-cover" alt={v.title} />
-                                                    <span className="text-xs font-medium line-clamp-2 text-zinc-300 group-hover:text-white">{v.title}</span>
+                                                    <span className="text-xs font-medium line-clamp-2 text-zinc-300">{v.title}</span>
                                                 </li>
                                             ) : null;
                                         })}
                                     </ul>
                                 ) : (
-                                    <div className="text-center py-8 bg-zinc-950 rounded border border-dashed border-zinc-800 text-zinc-600 text-sm">
-                                        Nenhum vídeo assistido ainda.
-                                    </div>
+                                    <div className="text-center py-8 text-zinc-600 text-sm">Nenhum vídeo assistido.</div>
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-12 text-zinc-600">
-                            Selecione um usuário na lista ao lado para ver os detalhes e histórico.
-                        </div>
+                        <div className="text-center py-12 text-zinc-600">Selecione um usuário para detalhes.</div>
                     )}
                 </div>
             </div>
         </div>
       </div>
       
-      {/* (Modal Adicionar Vídeo logic omitted for brevity, remains same) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-              <h2 className="text-2xl font-black text-white italic">CADASTRAR NOVO VÍDEO</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors">
+              <h2 className="text-2xl font-black text-white italic uppercase">CADASTRAR VÍDEO</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-800 rounded-full text-zinc-400">
                 <X size={24} />
               </button>
             </div>
@@ -241,97 +310,35 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
             <form onSubmit={handleAddVideo} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Título do Vídeo</label>
-                  <input 
-                    required
-                    type="text" 
-                    placeholder="Ex: Como gerenciar seu tempo"
-                    className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none"
-                    value={newVideo.title}
-                    onChange={(e) => setNewVideo({...newVideo, title: e.target.value})}
-                  />
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Título</label>
+                  <input required type="text" className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white outline-none" value={newVideo.title} onChange={(e) => setNewVideo({...newVideo, title: e.target.value})} />
                 </div>
-                
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">URL do Vídeo (YouTube)</label>
-                  <div className="relative">
-                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                    <input 
-                      required
-                      type="url" 
-                      placeholder="https://www.youtube.com/embed/..."
-                      className="w-full bg-zinc-800 border-none rounded-lg pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none"
-                      value={newVideo.url}
-                      onChange={(e) => setNewVideo({...newVideo, url: e.target.value})}
-                    />
-                  </div>
+                  <label className="text-xs font-bold text-zinc-500 uppercase">URL YouTube</label>
+                  <input required type="url" className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white outline-none" value={newVideo.url} onChange={(e) => setNewVideo({...newVideo, url: e.target.value})} />
                 </div>
-
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-bold text-zinc-500 uppercase">Descrição</label>
-                  <textarea 
-                    required
-                    rows={3}
-                    placeholder="Breve resumo do conteúdo..."
-                    className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none resize-none"
-                    value={newVideo.description}
-                    onChange={(e) => setNewVideo({...newVideo, description: e.target.value})}
-                  />
+                  <textarea required rows={3} className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white outline-none resize-none" value={newVideo.description} onChange={(e) => setNewVideo({...newVideo, description: e.target.value})} />
                 </div>
-
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Expert Relacionado</label>
-                  <select 
-                    required
-                    className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none appearance-none"
-                    value={newVideo.expertId}
-                    onChange={(e) => setNewVideo({...newVideo, expertId: e.target.value})}
-                  >
-                    <option value="">Selecione um expert</option>
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Expert</label>
+                  <select required className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white outline-none" value={newVideo.expertId} onChange={(e) => setNewVideo({...newVideo, expertId: e.target.value})}>
+                    <option value="">Selecione</option>
                     {EXPERTS.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                   </select>
                 </div>
-
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Assunto / Categoria</label>
-                  <select 
-                    required
-                    className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none appearance-none"
-                    value={newVideo.category}
-                    onChange={(e) => setNewVideo({...newVideo, category: e.target.value})}
-                  >
-                    <option value="">Selecione o assunto</option>
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Assunto</label>
+                  <select required className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white outline-none" value={newVideo.category} onChange={(e) => setNewVideo({...newVideo, category: e.target.value})}>
+                    <option value="">Selecione</option>
                     {ASSUNTOS.filter(a => a !== 'Conheça outros assuntos').map(a => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Faz parte de qual trilha? (Opcional)</label>
-                  <select 
-                    className="w-full bg-zinc-800 border-none rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-red-600 transition-all outline-none appearance-none"
-                    value={newVideo.trilhaId}
-                    onChange={(e) => setNewVideo({...newVideo, trilhaId: e.target.value})}
-                  >
-                    <option value="">Nenhuma trilha específica</option>
-                    {TRILHAS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                  </select>
-                </div>
               </div>
-
-              <div className="pt-4 border-t border-zinc-800 flex gap-4">
-                <button 
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-lg transition-colors"
-                >
-                  CANCELAR
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-red-600/20"
-                >
-                  CONFIRMAR CADASTRO
-                </button>
+              <div className="pt-4 flex gap-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 bg-zinc-800 py-3 rounded-lg font-bold">CANCELAR</button>
+                <button type="submit" className="flex-1 bg-red-600 py-3 rounded-lg font-bold">CONFIRMAR</button>
               </div>
             </form>
           </div>
@@ -344,7 +351,7 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
 const StatCard: React.FC<{icon: React.ReactNode, label: string, value: string}> = ({icon, label, value}) => (
     <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-lg group hover:border-red-600/30 transition-colors">
         <div className="flex items-center justify-between mb-4">
-            <span className="text-zinc-500 font-bold uppercase text-xs tracking-widest">{label}</span>
+            <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{label}</span>
             <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-800 group-hover:scale-110 transition-transform">{icon}</div>
         </div>
         <div className="text-3xl font-black text-white">{value}</div>
@@ -354,7 +361,7 @@ const StatCard: React.FC<{icon: React.ReactNode, label: string, value: string}> 
 const TabButton: React.FC<{active: boolean, onClick: () => void, label: string, icon: React.ReactNode}> = ({active, onClick, label, icon}) => (
     <button 
         onClick={onClick}
-        className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 transition-all px-2 ${active ? 'border-red-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+        className={`flex items-center gap-2 pb-4 text-xs font-black uppercase tracking-widest border-b-2 transition-all px-2 ${active ? 'border-red-600 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
     >
         {icon} {label}
     </button>
