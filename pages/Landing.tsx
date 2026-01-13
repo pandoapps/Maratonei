@@ -7,7 +7,9 @@ const Landing: React.FC = () => {
     <div className="min-h-screen bg-black text-white selection:bg-red-600">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 py-6 bg-gradient-to-b from-black/80 to-transparent">
-        <h1 className="text-3xl font-extrabold text-red-600 tracking-tighter uppercase italic">Maratonei!</h1>
+        <h1 className="text-3xl font-extrabold text-white tracking-tighter uppercase italic">
+          <span className="text-yellow-400">IH</span> maratonei
+        </h1>
         <Link to="/auth" className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold transition-colors">
           Entrar
         </Link>
@@ -61,7 +63,7 @@ const Landing: React.FC = () => {
       </section>
 
       <footer className="py-12 text-center border-t border-zinc-900 text-zinc-500">
-        <p>&copy; 2025 Maratonei! - Todos os direitos reservados.</p>
+        <p>&copy; 2024 IH maratonei - Todos os direitos reservados.</p>
       </footer>
     </div>
   );

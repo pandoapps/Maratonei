@@ -41,7 +41,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       <div className="absolute inset-0 opacity-20 bg-[url('https://picsum.photos/seed/auth-bg/1920/1080?grayscale')] bg-cover"></div>
       
       <div className="bg-black/90 p-8 md:p-16 rounded-lg w-full max-w-md relative z-10 border border-zinc-800 shadow-2xl">
-        <h1 className="text-4xl font-black text-red-600 italic mb-8 text-center uppercase">Maratonei!</h1>
+        <h1 className="text-4xl font-black text-white italic mb-8 text-center uppercase tracking-tighter">
+          <span className="text-yellow-400">IH</span> maratonei
+        </h1>
         <h2 className="text-3xl font-bold text-white mb-8">{isLogin ? 'Entrar' : 'Criar conta'}</h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">

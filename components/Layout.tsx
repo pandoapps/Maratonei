@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { User } from '../types';
 import { ASSUNTOS, EXPERTS, TRILHAS } from '../constants';
 import { Menu, LogOut, Search, Settings, User as UserIcon, ChevronDown } from 'lucide-react';
@@ -16,6 +16,8 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { type: currentType, id: currentId } = useParams<{ type: string; id: string }>();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -34,6 +36,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
     navigate(`/explore/${type}/${encodeURIComponent(id)}`);
   };
 
+  const isActive = (type: string, id: string) => {
+    return currentType === type && currentId === id;
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Sidebar */}
@@ -43,8 +49,8 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
         <div className="p-6 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             {isSidebarOpen && (
-              <Link to="/home" className="text-2xl font-black text-red-600 italic hover:text-red-500 transition-colors">
-                MARATONEI!
+              <Link to="/home" className="text-2xl font-black text-white italic hover:text-zinc-200 transition-colors uppercase tracking-tighter">
+                <span className="text-yellow-400">IH</span> maratonei
               </Link>
             )}
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1 hover:bg-zinc-800 rounded">
@@ -55,15 +61,16 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
           <div className="flex-1 overflow-y-auto space-y-8 scrollbar-hide">
             {/* Assuntos */}
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Assuntos</h3>
+              <h3 className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-4">Assuntos</h3>
               <ul className="space-y-2">
                 {ASSUNTOS.map((item, idx) => {
                   const isSpecial = item === 'Conheça outros assuntos';
+                  const active = isActive('subject', item);
                   return (
                     <li key={idx}>
                       <button 
                         onClick={() => !isSpecial && navigateToExplore('subject', item)}
-                        className={`text-sm transition-colors w-full text-left py-1 truncate ${isSpecial ? 'text-red-600 hover:text-red-500 font-bold cursor-default' : 'text-zinc-400 hover:text-white'}`}
+                        className={`text-sm transition-colors w-full text-left py-1 truncate ${isSpecial ? 'text-red-600 hover:text-red-500 font-bold cursor-default' : active ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
                       >
                         {item}
                       </button>
@@ -75,36 +82,42 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
 
             {/* Experts */}
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Experts</h3>
+              <h3 className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-4">Experts</h3>
               <ul className="space-y-2">
-                {EXPERTS.map((expert) => (
-                  <li key={expert.id}>
-                    <button 
-                      onClick={() => navigateToExplore('expert', expert.id)}
-                      className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate"
-                    >
-                      {expert.name}
-                    </button>
-                  </li>
-                ))}
+                {EXPERTS.map((expert) => {
+                  const active = isActive('expert', expert.id);
+                  return (
+                    <li key={expert.id}>
+                      <button 
+                        onClick={() => navigateToExplore('expert', expert.id)}
+                        className={`text-sm transition-colors w-full text-left py-1 truncate ${active ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
+                      >
+                        {expert.name}
+                      </button>
+                    </li>
+                  );
+                })}
                 <li><button className="text-sm text-red-600 hover:text-red-500 font-bold transition-colors w-full text-left py-1">Conheça outros influencers</button></li>
               </ul>
             </div>
 
             {/* Trilhas */}
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Trilhas</h3>
+              <h3 className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-4">Trilhas</h3>
               <ul className="space-y-2">
-                {TRILHAS.map((trilha) => (
-                  <li key={trilha.id}>
-                    <button 
-                      onClick={() => navigateToExplore('trilha', trilha.id)}
-                      className="text-sm text-zinc-400 hover:text-white transition-colors w-full text-left py-1 truncate"
-                    >
-                      {trilha.name}
-                    </button>
-                  </li>
-                ))}
+                {TRILHAS.map((trilha) => {
+                  const active = isActive('trilha', trilha.id);
+                  return (
+                    <li key={trilha.id}>
+                      <button 
+                        onClick={() => navigateToExplore('trilha', trilha.id)}
+                        className={`text-sm transition-colors w-full text-left py-1 truncate ${active ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
+                      >
+                        {trilha.name}
+                      </button>
+                    </li>
+                  );
+                })}
                 <li><button className="text-sm text-red-600 hover:text-red-500 font-bold transition-colors w-full text-left py-1">Conheça outras trilhas</button></li>
               </ul>
             </div>
@@ -114,10 +127,10 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
             <div className="pt-4 border-t border-zinc-900">
                <button 
                 onClick={() => navigate('/admin')}
-                className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors w-full py-2"
+                className={`flex items-center gap-3 transition-colors w-full py-2 ${location.pathname === '/admin' ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'}`}
                >
                  <Settings size={20} />
-                 {isSidebarOpen && <span className="text-sm font-bold">Admin Panel</span>}
+                 {isSidebarOpen && <span className="text-sm">Admin Panel</span>}
                </button>
             </div>
           )}
@@ -130,8 +143,8 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
         <header className="sticky top-0 z-[60] flex items-center justify-between px-8 py-4 bg-black/80 backdrop-blur-md border-b border-zinc-900">
           <div className="flex items-center gap-6">
             {!isSidebarOpen && (
-              <Link to="/home" className="text-xl font-black text-red-600 italic hover:text-red-500 transition-colors">
-                M!
+              <Link to="/home" className="text-xl font-black text-white italic hover:text-zinc-200 transition-colors uppercase tracking-tighter">
+                <span className="text-yellow-400">IH</span> maratonei
               </Link>
             )}
             <div className="relative group hidden md:block">
