@@ -8,12 +8,33 @@ import VideoDetails from './pages/VideoDetails';
 import Explore from './pages/Explore';
 import Admin from './pages/Admin';
 import { User } from './types';
+import { VIDEOS } from './constants';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('maratonei_user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  useEffect(() => {
+    if (user) {
+      // Seed random history if it doesn't exist
+      const history = JSON.parse(localStorage.getItem('maratonei_history') || '[]');
+      let userHistory = history.find((h: any) => h.userId === user.id);
+      
+      if (!userHistory) {
+        // Pick 2 random videos from the default set to show as "watched"
+        const randomIds = [...VIDEOS]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 2)
+          .map(v => v.id);
+          
+        userHistory = { userId: user.id, videoIds: randomIds };
+        history.push(userHistory);
+        localStorage.setItem('maratonei_history', JSON.stringify(history));
+      }
+    }
+  }, [user]);
 
   const login = (userData: User) => {
     setUser(userData);

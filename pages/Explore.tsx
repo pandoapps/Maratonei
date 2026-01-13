@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { User, Video, Expert, Trilha } from '../types';
 import { VIDEOS, EXPERTS, TRILHAS } from '../constants';
-import { Play, Info, ArrowLeft } from 'lucide-react';
+import { Play, Info, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 interface ExploreProps {
   user: User;
@@ -16,11 +16,19 @@ const Explore: React.FC<ExploreProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
   const [metadata, setMetadata] = useState<{ title: string; description: string; image: string } | null>(null);
+  const [watchedIds, setWatchedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
     const allVideos = [...VIDEOS, ...customVideos];
     
+    // Get history
+    const history = JSON.parse(localStorage.getItem('maratonei_history') || '[]');
+    const userHistory = history.find((h: any) => h.userId === user.id);
+    if (userHistory) {
+      setWatchedIds(userHistory.videoIds);
+    }
+
     let title = '';
     let description = '';
     let image = 'https://loremflickr.com/1200/630?lock=999';
@@ -38,7 +46,8 @@ const Explore: React.FC<ExploreProps> = ({ user, onLogout }) => {
       if (expert) {
         title = expert.name;
         description = expert.bio;
-        image = expert.image.replace('400/400', '1200/630');
+        // Pravatar used for experts, but here we use a landscape placeholder for hero
+        image = `https://loremflickr.com/1200/630?${expert.name}`;
         videos = allVideos.filter(v => v.expertId === expert.id);
       }
     } else if (type === 'trilha') {
@@ -54,7 +63,7 @@ const Explore: React.FC<ExploreProps> = ({ user, onLogout }) => {
     setMetadata({ title, description, image });
     setFilteredVideos(videos);
     window.scrollTo(0, 0);
-  }, [type, id]);
+  }, [type, id, user.id]);
 
   const recordView = (videoId: string) => {
     const history = JSON.parse(localStorage.getItem('maratonei_history') || '[]');
@@ -126,6 +135,14 @@ const Explore: React.FC<ExploreProps> = ({ user, onLogout }) => {
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 mb-4 border border-zinc-800 transition-all duration-300 group-hover:scale-[1.02] shadow-lg group-hover:shadow-red-600/10">
                   <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors"></div>
+                  
+                  {/* Watched Mark */}
+                  {watchedIds.includes(video.id) && (
+                    <div className="absolute top-3 right-3 bg-green-500 text-white p-1 rounded-full shadow-lg z-20">
+                      <CheckCircle2 size={18} />
+                    </div>
+                  )}
+
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="bg-red-600 p-4 rounded-full shadow-2xl transform scale-75 group-hover:scale-100 transition-transform">
                       <Play size={24} fill="white" />

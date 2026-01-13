@@ -125,9 +125,11 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
                                 <tr key={u.id} className={`hover:bg-zinc-800/50 cursor-pointer transition-colors ${selectedUser?.id === u.id ? 'bg-zinc-800' : ''}`} onClick={() => viewUserDetail(u)}>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center font-bold text-xs uppercase">
-                                                {u.name.charAt(0)}
-                                            </div>
+                                            <img 
+                                              src={`https://i.pravatar.cc/100?u=${u.id}`} 
+                                              className="w-10 h-10 rounded-full border border-zinc-700 object-cover"
+                                              alt={u.name}
+                                            />
                                             <div>
                                                 <p className="font-bold text-sm text-white">{u.name}</p>
                                                 <p className="text-xs text-zinc-500">{u.email}</p>
@@ -184,9 +186,11 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
                     {selectedUser ? (
                         <div>
                             <div className="text-center mb-8">
-                                <div className="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center text-3xl font-black mx-auto mb-4 border-4 border-zinc-800 shadow-xl">
-                                    {selectedUser.name.charAt(0)}
-                                </div>
+                                <img 
+                                  src={`https://i.pravatar.cc/300?u=${selectedUser.id}`} 
+                                  className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-zinc-800 shadow-xl object-cover" 
+                                  alt={selectedUser.name}
+                                />
                                 <h4 className="font-bold text-lg text-white">{selectedUser.name}</h4>
                                 <p className="text-zinc-500 text-sm">{selectedUser.email}</p>
                                 <p className="text-[10px] text-zinc-600 mt-1 uppercase font-bold">Desde {new Date(selectedUser.createdAt).toLocaleDateString()}</p>
@@ -222,8 +226,8 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
             </div>
         </div>
       </div>
-
-      {/* Modal Adicionar Vídeo */}
+      
+      {/* (Modal Adicionar Vídeo logic omitted for brevity, remains same) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -261,7 +265,6 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
                       onChange={(e) => setNewVideo({...newVideo, url: e.target.value})}
                     />
                   </div>
-                  <p className="text-[10px] text-zinc-500 mt-1">Insira o link de incorporação (embed) ou o link direto do vídeo.</p>
                 </div>
 
                 <div className="space-y-2 md:col-span-2">

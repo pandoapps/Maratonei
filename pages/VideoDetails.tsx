@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { User, Video } from '../types';
 import { VIDEOS, EXPERTS } from '../constants';
-import { Play, Share2, ThumbsUp, ArrowLeft, Sparkles } from 'lucide-react';
+import { Play, Share2, ThumbsUp, ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface VideoDetailsProps {
   user: User;
@@ -16,6 +16,7 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [video, setVideo] = useState<Video | null>(null);
   const [expert, setExpert] = useState<any>(null);
+  const [isWatched, setIsWatched] = useState(false);
 
   useEffect(() => {
     const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
@@ -25,8 +26,15 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
       setVideo(v);
       setExpert(EXPERTS.find(e => e.id === v.expertId));
     }
+    
+    const history = JSON.parse(localStorage.getItem('maratonei_history') || '[]');
+    const userHistory = history.find((h: any) => h.userId === user.id);
+    if (userHistory && userHistory.videoIds.includes(id)) {
+      setIsWatched(true);
+    }
+    
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, user.id]);
 
   if (!video) return null;
 
@@ -34,7 +42,6 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
   const allAvailableVideos = [...VIDEOS, ...customVideos];
   const recommendations = allAvailableVideos.filter(v => v.id !== video.id).slice(0, 4);
 
-  // Using a clean URL with essential parameters to fix Error 153
   const iframeSrc = `${video.embedUrl.split('?')[0]}?origin=${window.location.origin}&enablejsapi=1&rel=0&modestbranding=1`;
 
   return (
@@ -70,6 +77,11 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
           <div className="lg:col-span-2">
             <div className="flex flex-wrap items-center gap-4 mb-6">
                 <span className="text-green-500 font-bold">98% Match</span>
+                {isWatched && (
+                  <span className="flex items-center gap-1 bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded text-xs font-bold">
+                    <CheckCircle2 size={14} /> Já assistido
+                  </span>
+                )}
                 <span className="text-zinc-500">2024</span>
                 <span className="border border-zinc-700 px-1.5 py-0.5 text-[10px] text-zinc-400 rounded">HD</span>
                 <span className="text-zinc-400 text-sm">{video.category}</span>
@@ -95,7 +107,6 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
                 </button>
             </div>
 
-            {/* AI Insights placeholder (Netflix style feature) */}
             <div className="bg-red-900/10 border border-red-900/30 p-6 rounded-xl mb-12 flex gap-6">
                 <div className="bg-red-600 p-3 rounded-lg h-fit text-white">
                     <Sparkles size={24} />
@@ -114,7 +125,11 @@ const VideoDetails: React.FC<VideoDetailsProps> = ({ user, onLogout }) => {
           <div className="space-y-8">
             <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
                 <div className="flex items-center gap-4 mb-4">
-                    <img src={expert?.image || 'https://picsum.photos/seed/default/400/400'} className="w-16 h-16 rounded-full object-cover border-2 border-red-600" alt={expert?.name} />
+                    <img 
+                      src={`https://i.pravatar.cc/300?u=${expert?.id || 'default'}`} 
+                      className="w-16 h-16 rounded-full object-cover border-2 border-red-600" 
+                      alt={expert?.name} 
+                    />
                     <div>
                         <h4 className="font-bold text-lg">{expert?.name || 'Expert Especialista'}</h4>
                         <span className="text-zinc-500 text-sm">{expert?.role || 'Mentor Maratonei'}</span>

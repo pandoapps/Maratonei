@@ -14,28 +14,28 @@ export const EXPERTS: Expert[] = [
     id: 'expert-1', 
     name: 'Thiago Nigro', 
     role: 'Finanças e Negócios', 
-    image: 'https://picsum.photos/seed/nigro/400/400',
+    image: 'https://i.pravatar.cc/300?u=expert1',
     bio: 'Fundador do Grupo Primo e do canal O Primo Rico.'
   },
   { 
     id: 'expert-2', 
     name: 'Matheus Tomoto', 
     role: 'Educação Internacional', 
-    image: 'https://picsum.photos/seed/tomoto/400/400',
+    image: 'https://i.pravatar.cc/300?u=expert2',
     bio: 'Especialista em bolsas de estudo e oportunidades no exterior.'
   },
   { 
     id: 'expert-3', 
     name: 'Paulo Muzi', 
     role: 'Medicina e Performance', 
-    image: 'https://picsum.photos/seed/muzi/400/400',
+    image: 'https://i.pravatar.cc/300?u=expert3',
     bio: 'Médico ortopedista e referência em fisiologia do exercício.'
   },
   { 
     id: 'expert-4', 
     name: 'Felipe Deschamps', 
     role: 'Tecnologia', 
-    image: 'https://picsum.photos/seed/deschamps/400/400',
+    image: 'https://i.pravatar.cc/300?u=expert4',
     bio: 'Desenvolvedor e entusiasta de tecnologia com foco em carreira.'
   }
 ];
@@ -47,7 +47,6 @@ export const TRILHAS: Trilha[] = [
   { id: 't-4', name: 'Falar Inglês', description: 'Fluência acelerada', thumbnail: 'https://loremflickr.com/800/600?lock=40' }
 ];
 
-// Refined URL to avoid Error 153 by using a clean version of the embed link
 export const DEFAULT_YOUTUBE_URL = 'https://www.youtube.com/embed/31GZfsFrBRM';
 
 const IMAGE_BASE = 'https://loremflickr.com/800/600';

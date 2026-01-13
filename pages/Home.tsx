@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { User, Video } from '../types';
 import { VIDEOS, TRILHAS } from '../constants';
-import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Info, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 interface HomeProps {
   user: User;
@@ -15,11 +15,18 @@ const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeHero, setActiveHero] = useState(0);
   const [allVideos, setAllVideos] = useState<Video[]>([]);
+  const [watchedIds, setWatchedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const customVideos = JSON.parse(localStorage.getItem('maratonei_custom_videos') || '[]');
     setAllVideos([...VIDEOS, ...customVideos]);
-  }, []);
+    
+    const history = JSON.parse(localStorage.getItem('maratonei_history') || '[]');
+    const userHistory = history.find((h: any) => h.userId === user.id);
+    if (userHistory) {
+      setWatchedIds(userHistory.videoIds);
+    }
+  }, [user.id]);
 
   const featuredVideos = allVideos.slice(0, 3);
 
@@ -101,9 +108,9 @@ const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
       {/* Video Rows */}
       <div className={`px-8 ${featuredVideos.length > 0 ? 'mt-[-80px]' : 'mt-8'} relative z-20 space-y-12`}>
         
-        <VideoRow title="Em alta" videos={[...allVideos].sort((a,b) => b.views - a.views)} onVideoClick={recordView} />
+        <VideoRow title="Em alta" videos={[...allVideos].sort((a,b) => b.views - a.views)} onVideoClick={recordView} watchedIds={watchedIds} />
         
-        <VideoRow title="Para você: Empreendedorismo" videos={allVideos.filter(v => v.category === 'Empreendedorismo')} onVideoClick={recordView} />
+        <VideoRow title="Para você: Empreendedorismo" videos={allVideos.filter(v => v.category === 'Empreendedorismo')} onVideoClick={recordView} watchedIds={watchedIds} />
         
         {/* Trilhas Section */}
         <section>
@@ -127,7 +134,7 @@ const Home: React.FC<HomeProps> = ({ user, onLogout }) => {
           </div>
         </section>
 
-        <VideoRow title="Educação e Idiomas" videos={allVideos.filter(v => ['Inglês', 'Educação'].includes(v.category))} onVideoClick={recordView} />
+        <VideoRow title="Educação e Idiomas" videos={allVideos.filter(v => ['Inglês', 'Educação'].includes(v.category))} onVideoClick={recordView} watchedIds={watchedIds} />
       </div>
     </Layout>
   );
@@ -137,9 +144,10 @@ interface VideoRowProps {
   title: string;
   videos: Video[];
   onVideoClick: (id: string) => void;
+  watchedIds: string[];
 }
 
-const VideoRow: React.FC<VideoRowProps> = ({ title, videos, onVideoClick }) => {
+const VideoRow: React.FC<VideoRowProps> = ({ title, videos, onVideoClick, watchedIds }) => {
   if (videos.length === 0) return null;
 
   return (
@@ -161,6 +169,14 @@ const VideoRow: React.FC<VideoRowProps> = ({ title, videos, onVideoClick }) => {
             <div className="relative aspect-video rounded-md overflow-hidden bg-zinc-900 mb-3 border border-zinc-800 transition-transform duration-300 group-hover:scale-105 group-hover:z-10 shadow-lg group-hover:shadow-red-600/20">
               <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+              
+              {/* Green Checkmark for Watched Videos */}
+              {watchedIds.includes(video.id) && (
+                <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-lg z-20">
+                  <CheckCircle2 size={16} />
+                </div>
+              )}
+
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="bg-red-600 p-3 rounded-full shadow-xl">
                   <Play size={20} fill="white" />

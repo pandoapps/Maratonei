@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const userPhoto = `https://picsum.photos/seed/${user.id}/100/100`;
+  const userPhoto = `https://i.pravatar.cc/300?u=${user.id}`;
 
   const navigateToExplore = (type: string, id: string) => {
     navigate(`/explore/${type}/${encodeURIComponent(id)}`);
