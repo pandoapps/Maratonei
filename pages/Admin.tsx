@@ -55,7 +55,7 @@ const Admin: React.FC<AdminProps> = ({ user, onLogout }) => {
       id: `v-custom-${Date.now()}`,
       title: newVideo.title,
       description: newVideo.description,
-      thumbnail: `https://picsum.photos/1200/630?seed=${Date.now()}`,
+      thumbnail: `https://loremflickr.com/800/600?lock=${Math.floor(Math.random() * 1000)}`,
       embedUrl: embedUrl,
       expertId: newVideo.expertId,
       category: newVideo.category,
