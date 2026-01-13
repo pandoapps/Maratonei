@@ -61,7 +61,7 @@ const Landing: React.FC = () => {
       </section>
 
       <footer className="py-12 text-center border-t border-zinc-900 text-zinc-500">
-        <p>&copy; 2024 Maratonei! - Todos os direitos reservados.</p>
+        <p>&copy; 2025 Maratonei! - Todos os direitos reservados.</p>
       </footer>
     </div>
   );
