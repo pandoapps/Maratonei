@@ -10,4 +10,5 @@
    `npm run dev`
 4. Run the app:
    `cd /backend
+   
    php artisan serve`
