@@ -5,7 +5,7 @@
 
 
 1. Install dependencies:
-   `npm install`
+   `npm install --legacy-peer-deps`
 2. Run vite
    `npm run dev`
 4. Run the app:
